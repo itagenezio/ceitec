@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ViewState, Message } from './types';
 import { EVENT_DETAILS, MOCK_ATTENDANCE, MOCK_JUSTIFICATIONS } from './constants';
 import { sendMessageToAssistant } from './services/geminiService';
+import { supabase } from './services/supabase';
 import BottomSheet from './components/BottomSheet';
 
 const App: React.FC = () => {
@@ -16,6 +17,9 @@ const App: React.FC = () => {
   const [imageError, setImageError] = useState(false);
   const [adminTab, setAdminTab] = useState<'confirmed' | 'justified'>('confirmed');
   const [logoClicks, setLogoClicks] = useState(0);
+  const [supabaseStatus, setSupabaseStatus] = useState<'testing' | 'ok' | 'error'>('testing');
+  const [realAttendance, setRealAttendance] = useState<any[]>([]);
+  const [realJustifications, setRealJustifications] = useState<any[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,10 +28,29 @@ const App: React.FC = () => {
     }
   }, [chatMessages]);
 
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const { error } = await supabase.from('presencas').select('id').limit(1);
+        if (error && (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('not found'))) {
+          setSupabaseStatus('Tabela "presencas" não encontrada');
+        } else if (error) {
+          setSupabaseStatus(error.message as any);
+        } else {
+          setSupabaseStatus('ok');
+        }
+      } catch (err: any) {
+        setSupabaseStatus(err.message || 'Erro de Rede');
+      }
+    };
+    testConnection();
+  }, []);
+
   // Lógica de acesso secreto ao admin
   const handleLogoClick = () => {
     const newClicks = logoClicks + 1;
     if (newClicks >= 5) {
+      fetchAdminData();
       setView('admin');
       setLogoClicks(0);
     } else {
@@ -37,15 +60,48 @@ const App: React.FC = () => {
     }
   };
 
-  const handleConfirmPresence = () => {
+  const fetchAdminData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('presencas')
+        .select('*')
+        .order('criado_em', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        setRealAttendance(data.filter(item => item.confirmado));
+        setRealJustifications(data.filter(item => !item.confirmado));
+      }
+    } catch (err) {
+      console.error('Erro ao buscar dados do admin:', err);
+    }
+  };
+
+  const handleConfirmPresence = async () => {
     if (parentName.trim()) {
-      setView('success');
+      setIsLoading(true);
+      try {
+        const { error } = await supabase
+          .from('presencas')
+          .insert([
+            { nome_pai: parentName.trim(), confirmado: true }
+          ]);
+
+        if (error) throw error;
+        setView('success');
+      } catch (err: any) {
+        console.error('Erro ao salvar no Supabase:', err);
+        alert('Erro ao confirmar presença: ' + (err.message || 'Falha de conexão'));
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       alert("Por favor, informe seu nome antes de confirmar.");
     }
   };
 
-  const handleJustifyAbsence = () => {
+  const handleJustifyAbsence = async () => {
     if (!parentName.trim()) {
       alert("Por favor, informe seu nome para identificar a justificativa.");
       return;
@@ -54,7 +110,27 @@ const App: React.FC = () => {
       alert("Por favor, descreva brevemente o motivo da ausência.");
       return;
     }
-    setView('justified');
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('presencas')
+        .insert([
+          {
+            nome_pai: parentName.trim(),
+            justificativa: justification.trim(),
+            confirmado: false
+          }
+        ]);
+
+      if (error) throw error;
+      setView('justified');
+    } catch (err: any) {
+      console.error('Erro ao salvar justificativa:', err);
+      alert('Erro ao enviar justificativa: ' + (err.message || 'Falha de conexão'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -91,18 +167,25 @@ const App: React.FC = () => {
 
   const renderLanding = () => (
     <div className="max-w-md mx-auto min-h-screen flex flex-col p-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Indicador de Conexão Supabase */}
+      <div className={`text-[10px] font-bold text-center py-1 rounded-full uppercase tracking-widest ${supabaseStatus === 'ok' ? 'bg-green-100 text-green-700' :
+        supabaseStatus === 'testing' ? 'bg-gray-100 text-gray-500' : 'bg-red-100 text-red-700'
+        }`}>
+        Supabase: {supabaseStatus === 'ok' ? 'Conectado' : (supabaseStatus === 'testing' ? 'Testando...' : supabaseStatus)}
+      </div>
+
       <div className="flex flex-col items-center text-center pt-4">
-        <div 
+        <div
           onClick={handleLogoClick}
           className={`relative group mb-8 cursor-default transition-transform active:scale-95 ${logoClicks > 0 ? 'scale-105' : ''}`}
         >
           <div className="absolute -inset-2 bg-gradient-to-tr from-primary/40 to-blue-300/40 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition duration-1000"></div>
           <div className="relative bg-white dark:bg-gray-800 rounded-full shadow-2xl overflow-hidden w-48 h-48 flex items-center justify-center border-[6px] border-white dark:border-gray-700 ring-1 ring-gray-100 dark:ring-gray-600">
             {!imageError ? (
-              <img 
-                src="https://drive.google.com/uc?export=view&id=1vS8mB6uW7u6_V-f1N7y_N7-Y1X6u8u_S" 
-                alt="Logo CEITEC" 
-                className="w-full h-full object-contain p-2 select-none" 
+              <img
+                src="https://drive.google.com/uc?export=view&id=1vS8mB6uW7u6_V-f1N7y_N7-Y1X6u8u_S"
+                alt="Logo CEITEC"
+                className="w-full h-full object-contain p-2 select-none"
                 onError={() => setImageError(true)}
               />
             ) : (
@@ -147,8 +230,8 @@ const App: React.FC = () => {
             </label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined absolute left-4 text-gray-400 group-focus-within:text-primary transition-colors">person</span>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={parentName}
                 onChange={(e) => setParentName(e.target.value)}
                 placeholder="Ex: Carlos Eduardo de Sousa"
@@ -163,7 +246,7 @@ const App: React.FC = () => {
             </label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined absolute left-4 top-4 text-gray-400 group-focus-within:text-orange-500 transition-colors">history_edu</span>
-              <textarea 
+              <textarea
                 value={justification}
                 onChange={(e) => setJustification(e.target.value)}
                 placeholder="Caso não possa comparecer, conte-nos o motivo..."
@@ -173,17 +256,17 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 gap-3">
-          <button 
+          <button
             onClick={handleConfirmPresence}
             className="w-full bg-[#2a8d2a] hover:bg-[#237a23] text-white font-black py-4 rounded-2xl shadow-xl shadow-green-900/10 flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
           >
             <span className="material-symbols-outlined">check_circle</span>
             CONFIRMAR PRESENÇA
           </button>
-          
-          <button 
+
+          <button
             onClick={handleJustifyAbsence}
             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-orange-900/10 flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
           >
@@ -193,7 +276,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <div 
+      <div
         onClick={() => setView('chat')}
         className="bg-[#101922] dark:bg-gray-800 rounded-[2rem] p-6 text-white cursor-pointer hover:scale-[1.02] transition-all shadow-2xl relative overflow-hidden group border border-gray-700/30"
       >
@@ -228,12 +311,12 @@ const App: React.FC = () => {
             <span className="material-symbols-outlined text-5xl">verified</span>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">Confirmado!</h2>
           <p className="text-green-600 dark:text-green-400 font-black text-sm uppercase tracking-widest">Sua vaga está garantida</p>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-[2.5rem] p-8 w-full shadow-2xl">
           <div className="space-y-6 text-left">
             <div className="flex items-center gap-4">
@@ -257,7 +340,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={() => setView('landing')}
           className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all"
         >
@@ -276,17 +359,17 @@ const App: React.FC = () => {
             <span className="material-symbols-outlined text-5xl">feedback</span>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">Justificativa Recebida</h2>
           <p className="text-orange-500 font-black text-sm uppercase tracking-widest">Agradecemos o aviso</p>
         </div>
-        
+
         <div className="bg-orange-50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-800/30 rounded-3xl p-6 w-full italic text-orange-800 dark:text-orange-300 text-sm">
           "{justification}"
         </div>
 
-        <button 
+        <button
           onClick={() => setView('landing')}
           className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all"
         >
@@ -316,9 +399,8 @@ const App: React.FC = () => {
         {chatMessages.map(msg => (
           <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`flex items-end gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-              <div className={`px-5 py-3 rounded-2xl shadow-sm text-sm leading-relaxed ${
-                msg.role === 'user' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tr-none' : 'bg-primary text-white rounded-tl-none'
-              }`}>
+              <div className={`px-5 py-3 rounded-2xl shadow-sm text-sm leading-relaxed ${msg.role === 'user' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tr-none' : 'bg-primary text-white rounded-tl-none'
+                }`}>
                 {msg.text}
               </div>
             </div>
@@ -328,8 +410,8 @@ const App: React.FC = () => {
       </main>
       <footer className="p-4 bg-white dark:bg-[#101922] border-t border-gray-100 dark:border-gray-800">
         <div className="flex-1 bg-gray-50 dark:bg-gray-900 rounded-2xl px-4 py-3 flex items-center">
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -345,36 +427,41 @@ const App: React.FC = () => {
   const renderAdmin = () => (
     <div className="max-w-md mx-auto h-screen flex flex-col bg-background-light dark:bg-background-dark animate-in fade-in duration-300">
       <header className="sticky top-0 z-20 bg-white dark:bg-gray-800 p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shadow-sm">
-        <h2 className="text-lg font-black tracking-tight">Painel Gestor</h2>
+        <div className="flex flex-col">
+          <h2 className="text-lg font-black tracking-tight">Painel Gestor</h2>
+          <button onClick={fetchAdminData} className="text-[10px] text-primary font-bold flex items-center gap-1">
+            <span className="material-symbols-outlined text-xs">refresh</span> ATUALIZAR
+          </button>
+        </div>
         <button onClick={() => setView('landing')} className="text-red-500 font-black text-[10px] bg-red-50 dark:bg-red-900/10 px-4 py-2 rounded-xl uppercase tracking-widest">
           Sair
         </button>
       </header>
-      
+
       <main className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Dashboard Stats */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-[#2a8d2a] text-white p-5 rounded-3xl shadow-xl shadow-green-900/10 relative overflow-hidden">
             <p className="text-[9px] opacity-70 font-black uppercase tracking-widest">Confirmados</p>
-            <h3 className="text-3xl font-black mt-1">{MOCK_ATTENDANCE.length}</h3>
+            <h3 className="text-3xl font-black mt-1">{realAttendance.length}</h3>
             <span className="material-symbols-outlined absolute -right-2 -bottom-2 text-6xl opacity-10">check_circle</span>
           </div>
           <div className="bg-orange-500 text-white p-5 rounded-3xl shadow-xl shadow-orange-900/10 relative overflow-hidden">
             <p className="text-[9px] opacity-70 font-black uppercase tracking-widest">Justificados</p>
-            <h3 className="text-3xl font-black mt-1">{MOCK_JUSTIFICATIONS.length}</h3>
+            <h3 className="text-3xl font-black mt-1">{realJustifications.length}</h3>
             <span className="material-symbols-outlined absolute -right-2 -bottom-2 text-6xl opacity-10">feedback</span>
           </div>
         </div>
 
         {/* Tabs Control */}
         <div className="bg-white dark:bg-gray-800 p-1.5 rounded-2xl flex border border-gray-100 dark:border-gray-700">
-          <button 
+          <button
             onClick={() => setAdminTab('confirmed')}
             className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'confirmed' ? 'bg-primary text-white shadow-lg' : 'text-gray-400'}`}
           >
             Presenças
           </button>
-          <button 
+          <button
             onClick={() => setAdminTab('justified')}
             className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'justified' ? 'bg-orange-500 text-white shadow-lg' : 'text-gray-400'}`}
           >
@@ -385,36 +472,45 @@ const App: React.FC = () => {
         {/* Dynamic List */}
         <div className="space-y-3">
           {adminTab === 'confirmed' ? (
-            MOCK_ATTENDANCE.map(person => (
-              <div key={person.id} className="bg-white dark:bg-gray-800 p-4 rounded-3xl flex items-center gap-4 shadow-sm border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="relative">
-                  <img src={person.photo} alt={person.parentName} className="w-12 h-12 rounded-2xl object-cover border border-primary/10" />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-[8px]">check</span>
+            realAttendance.length > 0 ? (
+              realAttendance.map(person => (
+                <div key={person.id} className="bg-white dark:bg-gray-800 p-4 rounded-3xl flex items-center gap-4 shadow-sm border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="w-12 h-12 rounded-2xl bg-green-100 dark:bg-green-900/20 flex items-center justify-center text-green-600">
+                    <span className="material-symbols-outlined">person</span>
                   </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm">{person.nome_pai}</h4>
+                    <p className="text-[10px] text-gray-400 font-medium">Confirmado em: {new Date(person.criado_em).toLocaleDateString()}</p>
+                  </div>
+                  <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-1 rounded">
+                    {new Date(person.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}h
+                  </span>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">{person.parentName}</h4>
-                  <p className="text-[10px] text-gray-400 font-medium">Aluno: {person.studentName}</p>
-                </div>
-                <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-1 rounded">{person.entryTime}h</span>
-              </div>
-            ))
+              ))
+            ) : (
+              <p className="text-center text-gray-400 text-xs py-8">Nenhuma presença confirmada ainda.</p>
+            )
           ) : (
-            MOCK_JUSTIFICATIONS.map(item => (
-              <div key={item.id} className="bg-white dark:bg-gray-800 p-5 rounded-3xl space-y-3 shadow-sm border border-orange-100 dark:border-orange-800/30 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-black text-gray-900 dark:text-white text-sm uppercase">{item.parentName}</h4>
-                    <p className="text-[10px] text-orange-500 font-bold">Responsável por: {item.studentName}</p>
+            realJustifications.length > 0 ? (
+              realJustifications.map(item => (
+                <div key={item.id} className="bg-white dark:bg-gray-800 p-5 rounded-3xl space-y-3 shadow-sm border border-orange-100 dark:border-orange-800/30 animate-in fade-in slide-in-from-left-4 duration-300">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-black text-gray-900 dark:text-white text-sm uppercase">{item.nome_pai}</h4>
+                      <p className="text-[10px] text-orange-500 font-bold">Justificado em {new Date(item.criado_em).toLocaleDateString()}</p>
+                    </div>
+                    <span className="text-[8px] font-black opacity-30">
+                      {new Date(item.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}h
+                    </span>
                   </div>
-                  <span className="text-[8px] font-black opacity-30">{item.timestamp}</span>
+                  <div className="bg-orange-50 dark:bg-orange-900/10 p-4 rounded-2xl">
+                    <p className="text-xs text-orange-800 dark:text-orange-200 italic leading-relaxed">"{item.justificativa}"</p>
+                  </div>
                 </div>
-                <div className="bg-orange-50 dark:bg-orange-900/10 p-4 rounded-2xl">
-                  <p className="text-xs text-orange-800 dark:text-orange-200 italic leading-relaxed">"{item.reason}"</p>
-                </div>
-              </div>
-            ))
+              ))
+            ) : (
+              <p className="text-center text-gray-400 text-xs py-8">Nenhuma justificativa recebida ainda.</p>
+            )
           )}
         </div>
       </main>
