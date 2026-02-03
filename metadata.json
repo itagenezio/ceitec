@@ -1,0 +1,9 @@
+
+{
+  "name": "CEITEC - Reunião de Pais e Mestres",
+  "description": "Sistema de confirmação de presença e assistente IA para a reunião de pais e mestres do CEITEC Itapipoca.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
