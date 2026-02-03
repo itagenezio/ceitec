@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ViewState, Message } from './types';
-import { EVENT_DETAILS, MOCK_ATTENDANCE, MOCK_JUSTIFICATIONS } from './constants';
+import { EVENT_DETAILS } from './constants';
 import { sendMessageToAssistant } from './services/geminiService';
 import { supabase } from './services/supabase';
 import BottomSheet from './components/BottomSheet';
