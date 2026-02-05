@@ -16,15 +16,24 @@ export default defineConfig(({ mode }) => {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
     },
     build: {
-      chunkSizeWarningLimit: 1600,
+      chunkSizeWarningLimit: Infinity,
       rollupOptions: {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              if (id.includes('react')) return 'vendor-react';
-              if (id.includes('@supabase')) return 'vendor-supabase';
-              if (id.includes('@google/genai')) return 'vendor-ai';
-              return 'vendor';
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'vendor-react';
+              }
+              if (id.includes('@supabase')) {
+                return 'vendor-supabase';
+              }
+              if (id.includes('@google/genai')) {
+                return 'vendor-ai';
+              }
+              if (id.includes('react-router')) {
+                return 'vendor-router';
+              }
+              return 'vendor-other';
             }
           }
         }
