@@ -1,4 +1,5 @@
 
+
 export interface Message {
   id: string;
   role: 'user' | 'model';
@@ -6,12 +7,28 @@ export interface Message {
   timestamp: string;
 }
 
-export type ViewState = 'landing' | 'success' | 'justified' | 'chat' | 'admin';
+export type ViewState = 'home' | 'landing' | 'success' | 'justified' | 'chat' | 'admin' | 'create-event';
 
 export interface Attendance {
   id: string;
   parentName: string;
-  studentName: string;
+  studentName?: string;
   entryTime: string;
-  photo: string;
+  photo?: string;
+  confirmado: boolean;
+  justificativa?: string;
+  event_id?: string;
 }
+
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  requirements?: string;
+  image_url?: string;
+  created_at?: string;
+}
+
