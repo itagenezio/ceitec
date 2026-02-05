@@ -1,0 +1,18 @@
+
+/* Estilos globais básicos para consistência */
+:root {
+  --primary: #137fec;
+  --bg-light: #f6f7f8;
+  --bg-dark: #101922;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Garante que o Tailwind funcione bem com o modo escuro */
+.dark {
+  color-scheme: dark;
+}
