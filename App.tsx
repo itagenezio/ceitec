@@ -9,8 +9,11 @@ import HomeScreen from './components/HomeScreen';
 import CreateEventScreen from './components/CreateEventScreen';
 import AdminScreen from './components/AdminScreen';
 
+
 const App: React.FC = () => {
+  // v1.1.0 - Multi-event system update
   const [view, setView] = useState<ViewState>('home');
+
   const [events, setEvents] = useState<Event[]>([
     {
       id: 'default',
