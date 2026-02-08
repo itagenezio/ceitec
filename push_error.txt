@@ -1,0 +1,2 @@
+remote: Permission to itagenezio/ceitec.git denied to culturamakerprogramacaoeia-a11y.
+fatal: unable to access 'https://github.com/itagenezio/ceitec.git/': The requested URL returned error: 403
