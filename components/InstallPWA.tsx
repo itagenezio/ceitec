@@ -78,16 +78,22 @@ const InstallPWA = () => {
                             </button>
                         </header>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
+                        <div className="space-y-4 relative">
+                            {/* Arrow pointing to the actual Safari share button */}
+                            <div className="absolute -bottom-[140px] left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce text-white z-50 pointer-events-none text-center w-full">
+                                <span className="text-sm font-bold shadow-black drop-shadow-md bg-black/50 px-3 py-1 rounded-full mb-2">Toque no botão do navegador 👇</span>
+                                <span className="material-symbols-outlined text-5xl shadow-black drop-shadow-md">arrow_downward</span>
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800 opacity-80">
                                 <span className="material-symbols-outlined text-primary text-2xl">ios_share</span>
                                 <div>
                                     <span className="font-bold text-gray-900 dark:text-white block text-sm">1. Toque em Compartilhar</span>
-                                    <span className="text-xs text-gray-500">Botão no centro inferior do Safari</span>
+                                    <span className="text-xs text-gray-500">Localize este ícone no seu navegador</span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800 opacity-80">
                                 <span className="material-symbols-outlined text-primary text-2xl">add_box</span>
                                 <div>
                                     <span className="font-bold text-gray-900 dark:text-white block text-sm">2. Adicionar à Tela de Início</span>
@@ -95,7 +101,7 @@ const InstallPWA = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800 opacity-80">
                                 <span className="font-bold text-primary text-sm bg-primary/10 px-3 py-1 rounded-lg">Adicionar</span>
                                 <div>
                                     <span className="font-bold text-gray-900 dark:text-white block text-sm">3. Confirme em Adicionar</span>
