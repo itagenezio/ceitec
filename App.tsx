@@ -8,19 +8,12 @@ import BottomSheet from './components/BottomSheet';
 import HomeScreen from './components/HomeScreen';
 import CreateEventScreen from './components/CreateEventScreen';
 import AdminScreen from './components/AdminScreen';
-<<<<<<< HEAD
 import LoginScreen from './components/LoginScreen';
-=======
->>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
 
 const App: React.FC = () => {
   // v1.1.0 - Multi-event system update
-<<<<<<< HEAD
   const [view, setView] = useState<ViewState | 'auth' | 'create-event' | 'home'>('home');
-=======
-  const [view, setView] = useState<ViewState>('home');
->>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
   const [events, setEvents] = useState<Event[]>([
     {
@@ -42,6 +35,13 @@ const App: React.FC = () => {
   const [realAttendance, setRealAttendance] = useState<any[]>([]);
   const [realJustifications, setRealJustifications] = useState<any[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (logoClicks > 0) {
+      const timer = setTimeout(() => setLogoClicks(0), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [logoClicks]);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -92,6 +92,12 @@ const App: React.FC = () => {
 
   const handleLogoClick = (event?: Event) => {
     const newClicks = logoClicks + 1;
+
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+
     if (newClicks >= 5 || event) {
       if (event) setCurrentEvent(event);
       fetchAdminData();
@@ -99,7 +105,7 @@ const App: React.FC = () => {
       setLogoClicks(0);
     } else {
       setLogoClicks(newClicks);
-      setTimeout(() => setLogoClicks(0), 3000);
+      // Reset clicks after 3 seconds of inactivity
     }
   };
 
@@ -127,7 +133,6 @@ const App: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
   const handleSelectEvent = async (event: Event) => {
     setCurrentEvent(event);
 
@@ -138,13 +143,7 @@ const App: React.FC = () => {
     } else {
       setView('landing');
     }
-=======
-  const handleSelectEvent = (event: Event) => {
-    setCurrentEvent(event);
-    setView('landing');
->>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
   };
-
 
   const handleCreateEvent = (newEvent: Omit<Event, 'id'>) => {
     const id = Math.random().toString(36).substring(7);
@@ -248,7 +247,6 @@ const App: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
   const handleDeleteParticipant = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este registro?')) {
       try {
@@ -261,8 +259,6 @@ const App: React.FC = () => {
       }
     }
   };
-=======
->>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -311,8 +307,8 @@ const App: React.FC = () => {
         </header>
 
         <div className="flex flex-col items-center text-center pt-2">
-          <div onClick={handleLogoClick} className={`relative group mb-8 cursor-default transition-transform active:scale-95 ${logoClicks > 0 ? 'scale-105' : ''}`}>
-            <div className="absolute -inset-2 bg-gradient-to-tr from-primary/40 to-blue-300/40 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+          <div onClick={() => handleLogoClick()} className={`relative group mb-8 cursor-default transition-all duration-300 active:scale-95 ${logoClicks > 0 ? 'animate-pulse' : ''}`} style={{ transform: `scale(${1 + (logoClicks * 0.02)})` }}>
+            <div className={`absolute -inset-2 bg-gradient-to-tr from-primary/40 to-blue-300/40 rounded-full blur-xl transition-opacity duration-500 ${logoClicks > 0 ? 'opacity-40' : 'opacity-0 group-hover:opacity-20'}`}></div>
             <div className="relative bg-white dark:bg-gray-800 rounded-full shadow-2xl overflow-hidden w-40 h-40 flex items-center justify-center border-[6px] border-white dark:border-gray-700">
               {!imageError && event.image_url ? (
                 <img src={event.image_url} alt="Logo" className="w-full h-full object-cover" onError={() => setImageError(true)} />
@@ -552,7 +548,6 @@ const App: React.FC = () => {
           setAdminTab={setAdminTab}
           onRefresh={fetchAdminData}
           onBack={() => setView('home')}
-<<<<<<< HEAD
           onDelete={handleDeleteParticipant}
         />
       )}
@@ -560,8 +555,6 @@ const App: React.FC = () => {
         <LoginScreen
           onLoginSuccess={() => setView('landing')}
           onBack={() => setView('home')}
-=======
->>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
         />
       )}
       <BottomSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)} />

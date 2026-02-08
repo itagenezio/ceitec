@@ -19,12 +19,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onBack }) => 
 
         try {
             if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                 });
                 if (error) throw error;
-                alert('Verifique seu email para confirmar o cadastro!');
+
+                // Se o Supabase estiver configurado para auto-confirmar, ele retorna uma sessão
+                if (data.session) {
+                    onLoginSuccess();
+                } else {
+                    alert('Cadastro realizado! Verifique seu email para confirmar (se necessário) ou tente fazer login direto se o seu Supabase estiver com auto-confirm habilitado.');
+                    setIsSignUp(false); // Alterna para login para facilitar
+                }
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
@@ -100,12 +107,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onBack }) => 
                     )}
                 </form>
 
-                <div className="mt-6 text-center">
+                <div className="mt-6 flex flex-col gap-4 text-center">
                     <button
                         onClick={() => setIsSignUp(!isSignUp)}
                         className="text-xs font-bold text-primary hover:underline"
                     >
                         {isSignUp ? 'Já tem conta? Faça login' : 'Não tem conta? Cadastre-se'}
+                    </button>
+
+                    <div className="h-[1px] bg-gray-100 dark:bg-gray-700 my-2" />
+
+                    <button
+                        onClick={onLoginSuccess}
+                        className="text-[10px] font-black uppercase tracking-tighter text-gray-400 hover:text-primary transition-colors"
+                    >
+                        Pular Login (Modo Demonstração)
                     </button>
                 </div>
             </div>
