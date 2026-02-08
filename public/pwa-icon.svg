@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#137fec"/>
+  <path d="M256 100 L400 180 V332 C400 400 256 450 256 450 C256 450 112 400 112 332 V180 Z" fill="#ffffff"/>
+  <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="120" fill="#137fec">CEITEC</text>
+</svg>
