@@ -7,7 +7,11 @@ export interface Message {
   timestamp: string;
 }
 
+<<<<<<< HEAD
 export type ViewState = 'home' | 'landing' | 'success' | 'justified' | 'chat' | 'admin' | 'create-event' | 'auth';
+=======
+export type ViewState = 'home' | 'landing' | 'success' | 'justified' | 'chat' | 'admin' | 'create-event';
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
 export interface Attendance {
   id: string;

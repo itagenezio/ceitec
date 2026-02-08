@@ -1,5 +1,9 @@
 
 import React from 'react';
+<<<<<<< HEAD
+=======
+import { supabase } from '../services/supabase';
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
 interface AdminScreenProps {
     realAttendance: any[];
@@ -8,7 +12,10 @@ interface AdminScreenProps {
     setAdminTab: (tab: 'confirmed' | 'justified') => void;
     onRefresh: () => void;
     onBack: () => void;
+<<<<<<< HEAD
     onDelete: (id: string) => void;
+=======
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 }
 
 const AdminScreen: React.FC<AdminScreenProps> = ({
@@ -17,8 +24,12 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
     adminTab,
     setAdminTab,
     onRefresh,
+<<<<<<< HEAD
     onBack,
     onDelete
+=======
+    onBack
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 }) => {
     return (
         <div className="max-w-md mx-auto h-screen flex flex-col bg-background-light dark:bg-background-dark animate-in fade-in duration-300">
@@ -70,7 +81,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                     {adminTab === 'confirmed' ? (
                         realAttendance.length > 0 ? (
                             realAttendance.map(person => (
+<<<<<<< HEAD
                                 <div key={person.id} className="bg-white dark:bg-gray-800 p-4 rounded-3xl flex items-center gap-4 shadow-sm border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-right-4 duration-300 group relative">
+=======
+                                <div key={person.id} className="bg-white dark:bg-gray-800 p-4 rounded-3xl flex items-center gap-4 shadow-sm border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-right-4 duration-300">
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
                                     <div className="w-12 h-12 rounded-2xl bg-green-100 dark:bg-green-900/20 flex items-center justify-center text-green-600">
                                         <span className="material-symbols-outlined">person</span>
                                     </div>
@@ -78,6 +93,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                                         <h4 className="font-bold text-gray-900 dark:text-white text-sm">{person.nome_pai}</h4>
                                         <p className="text-[10px] text-gray-400 font-medium">Confirmado em: {new Date(person.criado_em).toLocaleDateString()}</p>
                                     </div>
+<<<<<<< HEAD
                                     <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-1 rounded mr-8">
                                         {new Date(person.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}h
                                     </span>
@@ -87,6 +103,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                                     >
                                         <span className="material-symbols-outlined text-lg">delete</span>
                                     </button>
+=======
+                                    <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-1 rounded">
+                                        {new Date(person.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}h
+                                    </span>
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
                                 </div>
                             ))
                         ) : (
@@ -95,12 +116,17 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                     ) : (
                         realJustifications.length > 0 ? (
                             realJustifications.map(item => (
+<<<<<<< HEAD
                                 <div key={item.id} className="bg-white dark:bg-gray-800 p-5 rounded-3xl space-y-3 shadow-sm border border-orange-100 dark:border-orange-800/30 animate-in fade-in slide-in-from-left-4 duration-300 relative">
+=======
+                                <div key={item.id} className="bg-white dark:bg-gray-800 p-5 rounded-3xl space-y-3 shadow-sm border border-orange-100 dark:border-orange-800/30 animate-in fade-in slide-in-from-left-4 duration-300">
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h4 className="font-black text-gray-900 dark:text-white text-sm uppercase">{item.nome_pai}</h4>
                                             <p className="text-[10px] text-orange-500 font-bold">Justificado em {new Date(item.criado_em).toLocaleDateString()}</p>
                                         </div>
+<<<<<<< HEAD
                                         <div className="flex items-center gap-2">
                                             <span className="text-[8px] font-black opacity-30">
                                                 {new Date(item.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}h
@@ -112,6 +138,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                                                 <span className="material-symbols-outlined text-lg">delete</span>
                                             </button>
                                         </div>
+=======
+                                        <span className="text-[8px] font-black opacity-30">
+                                            {new Date(item.criado_em).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}h
+                                        </span>
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
                                     </div>
                                     <div className="bg-orange-50 dark:bg-orange-900/10 p-4 rounded-2xl">
                                         <p className="text-xs text-orange-800 dark:text-orange-200 italic leading-relaxed">"{item.justificativa}"</p>

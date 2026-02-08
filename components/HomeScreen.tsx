@@ -15,7 +15,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ events, onSelectEvent, onCreate
         <div className="max-w-md mx-auto min-h-screen flex flex-col p-6 space-y-8 animate-in fade-in duration-500">
             <header className="flex justify-between items-center">
                 <div className="flex flex-col">
+<<<<<<< HEAD
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">Ceitec Eventos</h1>
+=======
+                    <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">Eventos</h1>
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
                     <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em]">CEITEC ITAPIPOCA</p>
                 </div>
                 <button

@@ -63,6 +63,20 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick, onAdminClick }) =
                             <span className="material-symbols-outlined text-primary">login</span>
                             <span className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Acessar Evento</span>
                         </button>
+<<<<<<< HEAD
+=======
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onAdminClick(event);
+                                setShowMenu(false);
+                            }}
+                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+                        >
+                            <span className="material-symbols-outlined text-orange-500">analytics</span>
+                            <span className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Relatório (Admin)</span>
+                        </button>
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
                         <div className="h-[1px] bg-gray-100 dark:bg-gray-800 my-1 mx-2" />
                         <button
                             onClick={(e) => e.stopPropagation()}

@@ -8,12 +8,19 @@ import BottomSheet from './components/BottomSheet';
 import HomeScreen from './components/HomeScreen';
 import CreateEventScreen from './components/CreateEventScreen';
 import AdminScreen from './components/AdminScreen';
+<<<<<<< HEAD
 import LoginScreen from './components/LoginScreen';
+=======
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
 
 const App: React.FC = () => {
   // v1.1.0 - Multi-event system update
+<<<<<<< HEAD
   const [view, setView] = useState<ViewState | 'auth' | 'create-event' | 'home'>('home');
+=======
+  const [view, setView] = useState<ViewState>('home');
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
   const [events, setEvents] = useState<Event[]>([
     {
@@ -120,6 +127,7 @@ const App: React.FC = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleSelectEvent = async (event: Event) => {
     setCurrentEvent(event);
 
@@ -130,6 +138,11 @@ const App: React.FC = () => {
     } else {
       setView('landing');
     }
+=======
+  const handleSelectEvent = (event: Event) => {
+    setCurrentEvent(event);
+    setView('landing');
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
   };
 
 
@@ -235,6 +248,7 @@ const App: React.FC = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleDeleteParticipant = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este registro?')) {
       try {
@@ -247,6 +261,8 @@ const App: React.FC = () => {
       }
     }
   };
+=======
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -536,6 +552,7 @@ const App: React.FC = () => {
           setAdminTab={setAdminTab}
           onRefresh={fetchAdminData}
           onBack={() => setView('home')}
+<<<<<<< HEAD
           onDelete={handleDeleteParticipant}
         />
       )}
@@ -543,6 +560,8 @@ const App: React.FC = () => {
         <LoginScreen
           onLoginSuccess={() => setView('landing')}
           onBack={() => setView('home')}
+=======
+>>>>>>> fa5d1125bf8d1413d79539a9512f2452965f6739
         />
       )}
       <BottomSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)} />
