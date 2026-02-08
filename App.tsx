@@ -414,8 +414,11 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <footer className="text-center pt-4 pb-8">
+        <footer className="text-center pt-4 pb-8 space-y-2">
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.4em]">CEITEC ITAPIPOCA • 2026</p>
+          <button onClick={() => window.location.reload()} className="text-[10px] text-primary/50 font-bold uppercase tracking-widest hover:text-primary">
+            Atualizar Sistema
+          </button>
         </footer>
       </div>
     );
