@@ -9,6 +9,7 @@ import HomeScreen from './components/HomeScreen';
 import CreateEventScreen from './components/CreateEventScreen';
 import AdminScreen from './components/AdminScreen';
 import LoginScreen from './components/LoginScreen';
+import InstallPWA from './components/InstallPWA';
 
 
 const App: React.FC = () => {
@@ -558,6 +559,7 @@ const App: React.FC = () => {
         />
       )}
       <BottomSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)} />
+      <InstallPWA />
     </div>
   );
 };
